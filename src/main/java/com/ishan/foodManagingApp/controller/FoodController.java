@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin
+//@CrossOrigin
+@CrossOrigin(origins = "https://foodmanagingapp.netlify.app")
 @RequestMapping("/api")
 public class FoodController {
 
