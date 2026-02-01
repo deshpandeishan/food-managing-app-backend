@@ -3,7 +3,9 @@ package com.ishan.foodManagingApp.service;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.repository.FoodRepo;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -18,7 +20,10 @@ public class FoodService {
         return repo.findAll();
     }
 
-    public void addFoodItem(Food foodItem) {
+    public void addFoodItem(Food foodItem, MultipartFile image) throws IOException {
+        foodItem.setImageName(image.getOriginalFilename());
+        foodItem.setImageType(image.getContentType());
+        foodItem.setImageData(image.getBytes());
         repo.save(foodItem);
     }
 
@@ -32,6 +37,7 @@ public class FoodService {
         foodItem.setFoodName(updatedItem.getFoodName());
         foodItem.setPrice(updatedItem.getPrice());
         foodItem.setCategory(updatedItem.getCategory());
+//        foodItem.setAvailable(updatedItem.getAvailable());
         repo.save(foodItem);
     }
 

@@ -4,12 +4,18 @@ package com.ishan.foodManagingApp.controller;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.service.FoodService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.databind.ObjectMapper;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class FoodController {
 
@@ -25,15 +31,20 @@ public class FoodController {
         return "Welcome Sir!";
     }
 
-    @GetMapping("/fooditems")
+    @GetMapping("/fooditem")
     public ResponseEntity<List<Food>> getFoodItems() {
         return new ResponseEntity<>(service.getFoodItems(),HttpStatus.OK);
     }
 
-    @PostMapping("/fooditem")
-    public ResponseEntity<?> addFoodItem(@RequestBody Food foodItem) {
+    @PostMapping(value = "/fooditem", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> addFoodItem(
+            @RequestPart("data") String foodJson,
+            @RequestPart("image") MultipartFile image) throws Exception {
+
+        ObjectMapper mapper = new ObjectMapper();
+        Food foodItem = mapper.readValue(foodJson, Food.class);
         try {
-            service.addFoodItem(foodItem);
+            service.addFoodItem(foodItem, image);
             return new ResponseEntity<>("Food item added", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -61,12 +72,16 @@ public class FoodController {
     }
 
     @DeleteMapping("/fooditem")
-    public ResponseEntity<?> deleleItem(@RequestBody Food foodItem) {
+    public ResponseEntity<Map<String, String>> deleteItem(@RequestBody Food foodItem) {
         try {
             service.deleteFoodItem(foodItem);
-            return new ResponseEntity<>("Food item deleted", HttpStatus.OK);
+            // Return success as JSON
+            Map<String, String> response = Collections.singletonMap("message", "Food item deleted");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            // Return error as JSON
+            Map<String, String> errorResponse = Collections.singletonMap("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
 }
