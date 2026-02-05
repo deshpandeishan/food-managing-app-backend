@@ -76,13 +76,17 @@ public class FoodController {
     public ResponseEntity<Map<String, String>> deleteItem(@RequestBody Food foodItem) {
         try {
             service.deleteFoodItem(foodItem);
-            // Return success as JSON
             Map<String, String> response = Collections.singletonMap("message", "Food item deleted");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            // Return error as JSON
             Map<String, String> errorResponse = Collections.singletonMap("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
+    }
+
 }
