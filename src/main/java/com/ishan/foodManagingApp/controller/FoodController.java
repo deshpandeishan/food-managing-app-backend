@@ -83,10 +83,4 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
-
-    @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("OK");
-    }
-
 }
