@@ -1,5 +1,6 @@
 package com.ishan.foodManagingApp.service;
 
+import com.ishan.foodManagingApp.DTO.FoodRequest;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.repository.FoodRepo;
 import org.springframework.stereotype.Service;
@@ -20,24 +21,23 @@ public class FoodService {
         return repo.findAll();
     }
 
-    public void addFoodItem(Food foodItem, MultipartFile image) throws IOException {
-        foodItem.setImageName(image.getOriginalFilename());
-        foodItem.setImageType(image.getContentType());
-        foodItem.setImageData(image.getBytes());
-        repo.save(foodItem);
+    public void addFoodItem(FoodRequest foodRequest, MultipartFile image) throws IOException {
+        Food food = new Food();
+        food.setFoodName(foodRequest.getFoodName());
+        food.setPrice(foodRequest.getPrice());
+        food.setCategory(foodRequest.getCategory());
+        food.setImageName(image.getOriginalFilename());
+        food.setImageType(image.getContentType());
+        food.setImageData(image.getBytes());
+        repo.save(food);
     }
 
-    public void addFoodItems(List<Food> multipleFoodItems) {
-        repo.saveAll(multipleFoodItems);
-    }
-
-    public void updateFoodItem(Food updatedItem) {
+    public void updateFoodItem(FoodRequest updatedItem) {
         Food foodItem = repo.findById(updatedItem.getFoodId())
                 .orElseThrow(() -> new RuntimeException("Food item not found!"));
         foodItem.setFoodName(updatedItem.getFoodName());
         foodItem.setPrice(updatedItem.getPrice());
         foodItem.setCategory(updatedItem.getCategory());
-//        foodItem.setAvailable(updatedItem.getAvailable());
         repo.save(foodItem);
     }
 
