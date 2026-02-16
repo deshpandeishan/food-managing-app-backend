@@ -2,6 +2,8 @@ package com.ishan.foodManagingApp.service;
 
 import com.ishan.foodManagingApp.DTO.FoodCreateRequest;
 import com.ishan.foodManagingApp.DTO.FoodUpdateRequest;
+import com.ishan.foodManagingApp.exception.FoodItemNotFoundException;
+import com.ishan.foodManagingApp.exception.InvalidImageException;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.repository.FoodRepo;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,19 @@ public class FoodService {
     }
 
     public void addFoodItem(FoodCreateRequest foodRequest, MultipartFile image) throws IOException {
+        if (image.isEmpty()) {
+            throw new InvalidImageException("Image is required");
+        }
+
+        String contentType = image.getContentType();
+        if (!("image/png".equals(contentType) || "image/jpeg".equals(contentType))) {
+            throw new InvalidImageException("Only PNG or JPEG images are allowed.");
+        }
+        long maxSize = 5 * 1024 * 1024;
+        if (image.getSize() > maxSize) {
+            throw new InvalidImageException("Image size must be less than 5MB.");
+        }
+
         Food food = new Food();
         food.setFoodName(foodRequest.getFoodName());
         food.setPrice(foodRequest.getPrice());
@@ -35,7 +50,7 @@ public class FoodService {
 
     public void updateFoodItem(FoodUpdateRequest updatedItem, MultipartFile image) throws IOException {
         Food foodItem = repo.findById(updatedItem.getFoodId())
-                .orElseThrow(() -> new RuntimeException("Food item not found!"));
+                .orElseThrow(() -> new FoodItemNotFoundException(updatedItem.getFoodId()));
         foodItem.setFoodName(updatedItem.getFoodName());
         foodItem.setPrice(updatedItem.getPrice());
         foodItem.setCategory(updatedItem.getCategory());
@@ -48,6 +63,9 @@ public class FoodService {
     }
 
     public void deleteFoodItem(Integer foodId) {
+        if (!repo.existsById(foodId)) {
+            throw new FoodItemNotFoundException(foodId);
+        }
         repo.deleteById(foodId);
     }
 }

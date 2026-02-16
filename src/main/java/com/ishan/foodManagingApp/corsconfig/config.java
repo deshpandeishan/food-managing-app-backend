@@ -1,4 +1,4 @@
-package com.ishan.foodManagingApp.CorsConfig;
+package com.ishan.foodManagingApp.corsconfig;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
