@@ -33,12 +33,17 @@ public class FoodService {
         repo.save(food);
     }
 
-    public void updateFoodItem(FoodUpdateRequest updatedItem) {
+    public void updateFoodItem(FoodUpdateRequest updatedItem, MultipartFile image) throws IOException {
         Food foodItem = repo.findById(updatedItem.getFoodId())
                 .orElseThrow(() -> new RuntimeException("Food item not found!"));
         foodItem.setFoodName(updatedItem.getFoodName());
         foodItem.setPrice(updatedItem.getPrice());
         foodItem.setCategory(updatedItem.getCategory());
+        if (image != null && !image.isEmpty()) {
+            foodItem.setImageName(image.getOriginalFilename());
+            foodItem.setImageType(image.getContentType());
+            foodItem.setImageData(image.getBytes());
+        }
         repo.save(foodItem);
     }
 

@@ -79,9 +79,23 @@ public class FoodController {
     }
 
     @PutMapping("/fooditem")
-    public ResponseEntity<?> updateFoodItem(@Valid @RequestBody FoodUpdateRequest updatedItem) {
+    public ResponseEntity<?> updateFoodItem(
+            @Valid
+            @RequestPart("data") FoodUpdateRequest updatedItem,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
         try {
-            service.updateFoodItem(updatedItem);
+            if (image != null && !image.isEmpty()) {
+                String contentType = image.getContentType();
+                if (!("image/png".equals(contentType) || "image/jpeg".equals(contentType))) {
+                    return ResponseEntity.badRequest().body("Only PNG or JPEG images are allowed.");
+                }
+
+                long maxSize = 5 * 1024 * 1024;
+                if (image.getSize() > maxSize) {
+                    return ResponseEntity.badRequest().body("Image size must be less than 5MB.");
+                }
+            }
+            service.updateFoodItem(updatedItem, image);
             return new ResponseEntity<>("Items details updated", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
