@@ -42,7 +42,7 @@ public class FoodService {
         repo.save(foodItem);
     }
 
-    public void deleteFoodItem(FoodUpdateRequest foodItem) {
-        repo.deleteById(foodItem.getFoodId());
+    public void deleteFoodItem(Integer foodId) {
+        repo.deleteById(foodId);
     }
 }

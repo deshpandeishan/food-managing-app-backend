@@ -88,10 +88,10 @@ public class FoodController {
         }
     }
 
-    @DeleteMapping("/fooditem")
-    public ResponseEntity<Map<String, String>> deleteItem(@Valid @RequestBody FoodUpdateRequest foodItem) {
+    @DeleteMapping("/fooditem/{id}")
+    public ResponseEntity<Map<String, String>> deleteItem(@PathVariable("id") Integer foodId) {
         try {
-            service.deleteFoodItem(foodItem);
+            service.deleteFoodItem(foodId);
             Map<String, String> response = Collections.singletonMap("message", "Food item deleted");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
