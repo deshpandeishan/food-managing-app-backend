@@ -1,6 +1,7 @@
 package com.ishan.foodManagingApp.service;
 
-import com.ishan.foodManagingApp.DTO.FoodRequest;
+import com.ishan.foodManagingApp.DTO.FoodCreateRequest;
+import com.ishan.foodManagingApp.DTO.FoodUpdateRequest;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.repository.FoodRepo;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class FoodService {
         return repo.findAll();
     }
 
-    public void addFoodItem(FoodRequest foodRequest, MultipartFile image) throws IOException {
+    public void addFoodItem(FoodCreateRequest foodRequest, MultipartFile image) throws IOException {
         Food food = new Food();
         food.setFoodName(foodRequest.getFoodName());
         food.setPrice(foodRequest.getPrice());
@@ -32,7 +33,7 @@ public class FoodService {
         repo.save(food);
     }
 
-    public void updateFoodItem(FoodRequest updatedItem) {
+    public void updateFoodItem(FoodUpdateRequest updatedItem) {
         Food foodItem = repo.findById(updatedItem.getFoodId())
                 .orElseThrow(() -> new RuntimeException("Food item not found!"));
         foodItem.setFoodName(updatedItem.getFoodName());
@@ -41,7 +42,7 @@ public class FoodService {
         repo.save(foodItem);
     }
 
-    public void deleteFoodItem(Food foodItem) {
+    public void deleteFoodItem(FoodUpdateRequest foodItem) {
         repo.deleteById(foodItem.getFoodId());
     }
 }

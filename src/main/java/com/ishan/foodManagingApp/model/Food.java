@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
 @Data
@@ -17,7 +18,7 @@ public class Food {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer foodId;
     @NotBlank()
-    @Size(max=100)
+    @Size(max = 100)
     private String foodName;
     @NotNull()
     @Positive()
