@@ -7,6 +7,8 @@ import com.ishan.foodManagingApp.DTO.FoodCreateRequest;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.service.FoodService;
 import jakarta.validation.Valid;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Base64;
+import java.util.Map;
 
 @RestController
 @CrossOrigin("http://localhost:4200/")
@@ -23,9 +27,11 @@ import java.util.Base64;
 public class FoodController {
 
     private final FoodService service;
+    private final ResourceLoader resourceLoader;
 
-    public FoodController(FoodService service) {
+    public FoodController(FoodService service, ResourceLoader resourceLoader) {
         this.service = service;
+        this.resourceLoader = resourceLoader;
     }
 
     @GetMapping("/")
@@ -98,5 +104,24 @@ public class FoodController {
         service.deleteFoodItem(foodId);
         return ResponseEntity.ok(new ApiResponse<>("Food item deleted", HttpStatus.OK.value(), null));
     }
+
+    @GetMapping("/fooditems/search")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> searchFoodItems(
+            @RequestParam("query") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<FoodResponse> resultPage = service.searchFoodItems(query, page, size);
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("items", resultPage.getContent());
+        responseData.put("currentPage", resultPage.getNumber());
+        responseData.put("totalItems", resultPage.getTotalElements());
+        responseData.put("totalPages", resultPage.getTotalPages());
+        responseData.put("pageSize", resultPage.getSize());
+
+        return ResponseEntity.ok(new ApiResponse<>("Search results", HttpStatus.OK.value(), responseData));
+    }
+
 
 }

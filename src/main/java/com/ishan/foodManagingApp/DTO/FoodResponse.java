@@ -17,4 +17,6 @@ public class FoodResponse {
     private BigDecimal price;
     private String category;
     private String image;
+    private String imageName;
+    private String imageType;
 }
