@@ -4,7 +4,6 @@ import com.ishan.foodManagingApp.DTO.ApiResponse;
 import com.ishan.foodManagingApp.DTO.FoodResponse;
 import com.ishan.foodManagingApp.DTO.FoodUpdateRequest;
 import com.ishan.foodManagingApp.DTO.FoodCreateRequest;
-import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.service.FoodService;
 import jakarta.validation.Valid;
 import org.springframework.core.io.ResourceLoader;
@@ -17,8 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Base64;
 import java.util.Map;
 
 @RestController
@@ -27,11 +24,9 @@ import java.util.Map;
 public class FoodController {
 
     private final FoodService service;
-    private final ResourceLoader resourceLoader;
 
     public FoodController(FoodService service, ResourceLoader resourceLoader) {
         this.service = service;
-        this.resourceLoader = resourceLoader;
     }
 
     @GetMapping("/")
@@ -41,23 +36,20 @@ public class FoodController {
     }
 
     @GetMapping("/fooditem")
-    public ResponseEntity<ApiResponse<List<FoodResponse>>> getFoodItems() {
-        List<Food> foods = service.getFoodItems();
-        List<FoodResponse> responseData = foods.stream().map(food -> {
-            FoodResponse fr = new FoodResponse();
-            fr.setFoodId(food.getFoodId());
-            fr.setFoodName(food.getFoodName());
-            fr.setPrice(food.getPrice());
-            fr.setCategory(food.getCategory());
-            if (food.getImageData() != null) {
-                fr.setImage("data:" + food.getImageType() + ";base64," +
-                        Base64.getEncoder().encodeToString(food.getImageData()));
-            }
-            return fr;
-        }).toList();
+public ResponseEntity<ApiResponse<Map<String, Object>>> getFoodItems(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "0") int size,
+            @RequestParam(defaultValue = "10") int page) {
+        Page<FoodResponse> pageResult = service.searchAndFilter(query, category, page, size);
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("items", pageResult.getContent());
+        responseData.put("currentPage", pageResult.getNumber());
+        responseData.put("totalItems", pageResult.getTotalElements());
+        responseData.put("totalPages", pageResult.getTotalPages());
+        responseData.put("pageSize", pageResult.getSize());
 
-        ApiResponse<List<FoodResponse>> response = new ApiResponse<>("Food items fetched", HttpStatus.OK.value(), responseData);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>("Fetched food items", HttpStatus.OK.value(), responseData));
     }
 
     @PostMapping(value = "/fooditem", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -107,11 +99,12 @@ public class FoodController {
 
     @GetMapping("/fooditems/search")
     public ResponseEntity<ApiResponse<Map<String, Object>>> searchFoodItems(
-            @RequestParam("query") String query,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Page<FoodResponse> resultPage = service.searchFoodItems(query, page, size);
+        Page<FoodResponse> resultPage = service.searchAndFilter(query, category, page, size);
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("items", resultPage.getContent());

@@ -28,5 +28,6 @@ public class Food {
     private String imageName;
     private String imageType;
     @Lob
+    @Column(columnDefinition = "bytea")
     private byte[] imageData;
 }

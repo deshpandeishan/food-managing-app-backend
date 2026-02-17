@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.List;
 
 @Service
 public class FoodService {
@@ -23,10 +21,6 @@ public class FoodService {
     private final FoodRepo repo;
     public FoodService(FoodRepo repo) {
         this.repo = repo;
-    }
-
-    public List<Food> getFoodItems() {
-        return repo.findAll();
     }
 
     public void addFoodItem(FoodCreateRequest foodRequest, MultipartFile image) throws IOException {
@@ -74,8 +68,8 @@ public class FoodService {
         repo.deleteById(foodId);
     }
 
-    public Page<FoodResponse> searchFoodItems(String query, int page, int size) {
+    public Page<FoodResponse> searchAndFilter(String query, String category, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return repo.searchFood(query, pageable);
+        return repo.searchAndFilter(query, category, pageable);
     }
 }
