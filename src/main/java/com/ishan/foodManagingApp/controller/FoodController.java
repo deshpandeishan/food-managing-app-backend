@@ -36,7 +36,7 @@ public class FoodController {
     }
 
     @GetMapping("/fooditem")
-public ResponseEntity<ApiResponse<Map<String, Object>>> getFoodItems(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getFoodItems(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String category,
             @RequestParam(defaultValue = "0") int size,
@@ -55,7 +55,7 @@ public ResponseEntity<ApiResponse<Map<String, Object>>> getFoodItems(
     @PostMapping(value = "/fooditem", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> addFoodItem(
             @Valid @RequestPart("data") FoodCreateRequest foodItem,
-            @RequestPart("image") MultipartFile image) throws IOException {
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
         if (image.isEmpty()) {
             return ResponseEntity.badRequest().body(new ApiResponse<>("Image is required", HttpStatus.BAD_REQUEST.value(), null));
@@ -63,11 +63,12 @@ public ResponseEntity<ApiResponse<Map<String, Object>>> getFoodItems(
         if (!("image/png".equals(image.getContentType()) || "image/jpeg".equals(image.getContentType()))) {
             return ResponseEntity.badRequest().body(new ApiResponse<>("Only PNG or JPEG images are allowed.", HttpStatus.BAD_REQUEST.value(), null));
         }
-        if (image.getSize() > 5 * 1024 * 1024) {
+        if (image.getSize() > 10 * 1024 * 1024) {
             return ResponseEntity.badRequest().body(new ApiResponse<>("Image size must be less than 5MB.", HttpStatus.BAD_REQUEST.value(), null));
         }
-
+        System.out.println("Controller: Received request with image: " + (image != null ? image.getContentType() : "null"));
         service.addFoodItem(foodItem, image);
+        System.out.println("Controller: Service finished processing image.");
         return ResponseEntity.ok(new ApiResponse<>("Food item added", HttpStatus.OK.value(), null));
     }
 
@@ -115,6 +116,4 @@ public ResponseEntity<ApiResponse<Map<String, Object>>> getFoodItems(
 
         return ResponseEntity.ok(new ApiResponse<>("Search results", HttpStatus.OK.value(), responseData));
     }
-
-
 }

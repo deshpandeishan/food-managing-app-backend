@@ -24,28 +24,28 @@ public class FoodService {
     }
 
     public void addFoodItem(FoodCreateRequest foodRequest, MultipartFile image) throws IOException {
-        if (image.isEmpty()) {
-            throw new InvalidImageException("Image is required");
-        }
-
-        String contentType = image.getContentType();
-        if (!("image/png".equals(contentType) || "image/jpeg".equals(contentType))) {
-            throw new InvalidImageException("Only PNG or JPEG images are allowed.");
-        }
-        long maxSize = 5 * 1024 * 1024;
-        if (image.getSize() > maxSize) {
-            throw new InvalidImageException("Image size must be less than 5MB.");
-        }
-
         Food food = new Food();
         food.setFoodName(foodRequest.getFoodName());
         food.setPrice(foodRequest.getPrice());
         food.setCategory(foodRequest.getCategory());
-        food.setImageName(image.getOriginalFilename());
-        food.setImageType(image.getContentType());
-        food.setImageData(image.getBytes());
+
+        if (image != null && !image.isEmpty()) {
+            food.setImageName(image.getOriginalFilename());
+            food.setImageType(image.getContentType());
+            food.setImageData(image.getBytes());
+        }
+
+        System.out.println("Debug: foodName class: " + food.getFoodName().getClass());
+        System.out.println("Debug: price class: " + food.getPrice().getClass());
+        System.out.println("Debug: category class: " + food.getCategory().getClass());
+        System.out.println("Debug: imageName class: " + (food.getImageName() != null ? food.getImageName().getClass() : "null"));
+        System.out.println("Debug: imageType class: " + (food.getImageType() != null ? food.getImageType().getClass() : "null"));
+        System.out.println("Debug: imageData class: " + (food.getImageData() != null ? food.getImageData().getClass() : "null"));
+
         repo.save(food);
+        System.out.println("Service: Saved Food entity to DB.");
     }
+
 
     public void updateFoodItem(FoodUpdateRequest updatedItem, MultipartFile image) throws IOException {
         Food foodItem = repo.findById(updatedItem.getFoodId())
