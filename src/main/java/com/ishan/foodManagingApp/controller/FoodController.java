@@ -4,9 +4,9 @@ import com.ishan.foodManagingApp.DTO.ApiResponse;
 import com.ishan.foodManagingApp.DTO.FoodResponse;
 import com.ishan.foodManagingApp.DTO.FoodUpdateRequest;
 import com.ishan.foodManagingApp.DTO.FoodCreateRequest;
+import com.ishan.foodManagingApp.exception.InvalidImageException;
 import com.ishan.foodManagingApp.service.FoodService;
 import jakarta.validation.Valid;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,7 +25,7 @@ public class FoodController {
 
     private final FoodService service;
 
-    public FoodController(FoodService service, ResourceLoader resourceLoader) {
+    public FoodController(FoodService service) {
         this.service = service;
     }
 
@@ -58,18 +57,18 @@ public class FoodController {
             @Valid @RequestPart("data") FoodCreateRequest foodItem,
             @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
-        if (image.isEmpty()) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>("Image is required", HttpStatus.BAD_REQUEST.value(), null));
+        if (image == null || image.isEmpty()) {
+            throw new InvalidImageException("Image is required.");
         }
         if (!("image/png".equals(image.getContentType()) || "image/jpeg".equals(image.getContentType()))) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>("Only PNG or JPEG images are allowed.", HttpStatus.BAD_REQUEST.value(), null));
+            throw new InvalidImageException("Only PNG or JPEG images are allowed.");
         }
-        if (image.getSize() > 10 * 1024 * 1024) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>("Image size must be less than 5MB.", HttpStatus.BAD_REQUEST.value(), null));
+        if (image.getSize() > 5 * 1024 * 1024) {
+            throw new InvalidImageException("Image size must be less than 5MB.");
         }
-        System.out.println("Controller: Received request with image: " + (image != null ? image.getContentType() : "null"));
+
         service.addFoodItem(foodItem, image);
-        System.out.println("Controller: Service finished processing image.");
+
         return ResponseEntity.ok(new ApiResponse<>("Food item added", HttpStatus.OK.value(), null));
     }
 
@@ -81,10 +80,10 @@ public class FoodController {
         if (image != null && !image.isEmpty()) {
             String contentType = image.getContentType();
             if (!("image/png".equals(contentType) || "image/jpeg".equals(contentType))) {
-                return ResponseEntity.badRequest().body(new ApiResponse<>("Only PNG or JPEG images are allowed.", HttpStatus.BAD_REQUEST.value(), null));
+                throw new InvalidImageException("Only PNG or JPEG images are allowed.");
             }
             if (image.getSize() > 5 * 1024 * 1024) {
-                return ResponseEntity.badRequest().body(new ApiResponse<>("Image size must be less than 5MB.", HttpStatus.BAD_REQUEST.value(), null));
+                throw new InvalidImageException("Image size must be less than 5MB.");
             }
         }
 
