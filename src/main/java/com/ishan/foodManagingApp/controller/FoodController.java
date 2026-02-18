@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -71,7 +72,6 @@ public class FoodController {
         System.out.println("Controller: Service finished processing image.");
         return ResponseEntity.ok(new ApiResponse<>("Food item added", HttpStatus.OK.value(), null));
     }
-
 
     @PutMapping("/fooditem")
     public ResponseEntity<ApiResponse<String>> updateFoodItem(

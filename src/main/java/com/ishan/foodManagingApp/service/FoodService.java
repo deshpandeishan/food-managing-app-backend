@@ -53,10 +53,20 @@ public class FoodService {
         foodItem.setFoodName(updatedItem.getFoodName());
         foodItem.setPrice(updatedItem.getPrice());
         foodItem.setCategory(updatedItem.getCategory());
+
         if (image != null && !image.isEmpty()) {
             foodItem.setImageName(image.getOriginalFilename());
             foodItem.setImageType(image.getContentType());
             foodItem.setImageData(image.getBytes());
+        } else if (updatedItem.getImageData() != null) {
+            foodItem.setImageName(updatedItem.getFoodName());
+            foodItem.setImageType(updatedItem.getImageType());
+            Byte[] boxed = updatedItem.getImageData();
+            byte[] unboxed = new byte[boxed.length];
+            for (int i = 0; i < boxed.length; i++) {
+                unboxed[i] = boxed[i];
+            }
+            foodItem.setImageData(unboxed);
         }
         repo.save(foodItem);
     }

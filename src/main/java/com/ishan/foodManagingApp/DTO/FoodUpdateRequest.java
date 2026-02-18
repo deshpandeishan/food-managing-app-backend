@@ -1,10 +1,13 @@
 package com.ishan.foodManagingApp.DTO;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 
@@ -20,4 +23,9 @@ public class FoodUpdateRequest {
     private BigDecimal price;
     @NotBlank
     private String category;
+    private String imageName;
+    private String imageType;
+    @Column(name = "image_data", columnDefinition = "bytea")
+    @JdbcTypeCode(SqlTypes.BINARY)
+    private Byte[] imageData;
 }
