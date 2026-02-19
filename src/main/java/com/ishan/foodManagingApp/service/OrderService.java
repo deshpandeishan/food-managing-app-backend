@@ -2,6 +2,7 @@ package com.ishan.foodManagingApp.service;
 
 import com.ishan.foodManagingApp.DTO.*;
 import com.ishan.foodManagingApp.exception.FoodItemNotFoundException;
+import com.ishan.foodManagingApp.exception.OrderNotFoundException;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.model.Order;
 import com.ishan.foodManagingApp.model.OrderItem;
@@ -9,8 +10,10 @@ import com.ishan.foodManagingApp.model.OrderStatus;
 import com.ishan.foodManagingApp.repository.FoodRepo;
 import com.ishan.foodManagingApp.repository.OrderRepo;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -82,5 +85,43 @@ public class OrderService {
         }
         response.setItems(itemResponses);
         return response;
+    }
+
+    public OrderDetailResponse getOrderById(Integer orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        OrderDetailResponse response = new OrderDetailResponse();
+        response.setOrderId(order.getOrderId());
+        response.setOrderDate(order.getOrderDate());
+        response.setStatus(order.getOrderStatus().name());
+        response.setTotalAmount(order.getTotalAmount());
+
+        List<OrderItemResponse> items = new ArrayList<>();
+        for (OrderItem item : order.getOrderItems()) {
+            OrderItemResponse itemResponse = new OrderItemResponse();
+            itemResponse.setFoodName(item.getFood().getFoodName());
+            itemResponse.setQuantity(item.getQuantity());
+            itemResponse.setPriceAtTimeOfOrder(item.getPriceAtTimeOfOrder());
+            itemResponse.setSubtotal(item.getSubtotal());
+            items.add(itemResponse);
+        }
+        response.setItems(items);
+        return response;
+    }
+
+    public Page<OrderListResponse> getOrdersList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> ordersPage = orderRepo.findAll(pageable);
+
+        return ordersPage.map(order -> {
+            OrderListResponse response = new OrderListResponse();
+            response.setOrderId(order.getOrderId());
+            response.setOrderDate(order.getOrderDate());
+            response.setStatus(order.getOrderStatus().name());
+            response.setTotalAmount(order.getTotalAmount());
+            response.setItemCount(order.getOrderItems().size());
+            return response;
+        });
     }
 }
