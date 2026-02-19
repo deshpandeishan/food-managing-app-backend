@@ -1,5 +1,6 @@
 package com.ishan.foodManagingApp.service;
 
+import com.ishan.foodManagingApp.DTO.ApiResponse;
 import com.ishan.foodManagingApp.DTO.FoodCreateRequest;
 import com.ishan.foodManagingApp.DTO.FoodResponse;
 import com.ishan.foodManagingApp.DTO.FoodUpdateRequest;
@@ -10,10 +11,12 @@ import com.ishan.foodManagingApp.repository.FoodRepo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Base64;
 
 @Service
 public class FoodService {
@@ -46,6 +49,22 @@ public class FoodService {
         System.out.println("Service: Saved Food entity to DB.");
     }
 
+    public FoodResponse getFoodItemById(Integer foodId) {
+        Food food = repo.findById(foodId) .orElseThrow(() -> new FoodItemNotFoundException(foodId));
+        FoodResponse foodResponse = new FoodResponse();
+        foodResponse.setFoodId(foodId);
+        foodResponse.setFoodName(food.getFoodName());
+        foodResponse.setPrice(food.getPrice());
+        foodResponse.setCategory(food.getCategory());
+        foodResponse.setImageName(food.getImageName());
+        foodResponse.setImageType(food.getImageType());
+//        foodResponse.setImage(food.getImage());
+        if(food.getImageData() != null) {
+            String base64Image = Base64.getEncoder().encodeToString(food.getImageData());
+            foodResponse.setImage(base64Image);
+        }
+        return foodResponse;
+    }
 
     public void updateFoodItem(FoodUpdateRequest updatedItem, MultipartFile image) throws IOException {
         Food foodItem = repo.findById(updatedItem.getFoodId())

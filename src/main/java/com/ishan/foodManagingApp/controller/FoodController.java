@@ -35,6 +35,12 @@ public class FoodController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("fooditem/{id}")
+    public ResponseEntity<ApiResponse<FoodResponse>> getSingleFoodItem(@PathVariable("id") Integer foodId) {
+        FoodResponse foodResponse = service.getFoodItemById(foodId);
+        return ResponseEntity.ok(new ApiResponse<>("Food item fetched", HttpStatus.OK.value(), foodResponse));
+    }
+
     @GetMapping("/fooditem")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getFoodItems(
             @RequestParam(required = false) String query,
@@ -72,6 +78,7 @@ public class FoodController {
         return ResponseEntity.ok(new ApiResponse<>("Food item added", HttpStatus.OK.value(), null));
     }
 
+//    this put mapping requires id inside JSON itself.
     @PutMapping("/fooditem")
     public ResponseEntity<ApiResponse<String>> updateFoodItem(
             @Valid @RequestPart("data") FoodUpdateRequest updatedItem,
