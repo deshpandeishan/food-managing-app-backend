@@ -58,7 +58,6 @@ public class FoodService {
         foodResponse.setCategory(food.getCategory());
         foodResponse.setImageName(food.getImageName());
         foodResponse.setImageType(food.getImageType());
-//        foodResponse.setImage(food.getImage());
         if(food.getImageData() != null) {
             String base64Image = Base64.getEncoder().encodeToString(food.getImageData());
             foodResponse.setImage(base64Image);
