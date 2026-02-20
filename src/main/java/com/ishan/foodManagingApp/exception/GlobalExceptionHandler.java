@@ -34,12 +34,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+    public ResponseEntity<ApiResponse<Object>> handleValidationErrors(MethodArgumentNotValidException exception) {
+        String message = exception.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
         ApiResponse<Object> response = new ApiResponse<>(message, HttpStatus.BAD_REQUEST.value(), null);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(OrderCancellationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOrderCancellation(OrderCancellationException exception) {
+        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONFLICT.value(), null);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOrderNotFoundException(OrderNotFoundException exception) {
+        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.NOT_FOUND.value(), null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
 }

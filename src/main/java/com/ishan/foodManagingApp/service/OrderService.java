@@ -2,6 +2,7 @@ package com.ishan.foodManagingApp.service;
 
 import com.ishan.foodManagingApp.DTO.*;
 import com.ishan.foodManagingApp.exception.FoodItemNotFoundException;
+import com.ishan.foodManagingApp.exception.OrderCancellationException;
 import com.ishan.foodManagingApp.exception.OrderNotFoundException;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.model.Order;
@@ -129,7 +130,7 @@ public class OrderService {
 
         Order order = orderRepo.findById(orderId) .orElseThrow(() -> new OrderNotFoundException(orderId));
         if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DELIVERED) {
-            throw new IllegalStateException("Cannot cancel and order which has been already canceled or delivered.");
+            throw new OrderCancellationException(orderId);
         }
         order.setOrderStatus(OrderStatus.CANCELED);
         orderRepo.save(order);
