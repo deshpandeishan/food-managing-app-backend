@@ -124,4 +124,16 @@ public class OrderService {
             return response;
         });
     }
+
+    public OrderDetailResponse cancelOrder(Integer orderId) {
+
+        Order order = orderRepo.findById(orderId) .orElseThrow(() -> new OrderNotFoundException(orderId));
+        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DELIVERED) {
+            throw new IllegalStateException("Cannot cancel and order which has been already canceled or delivered.");
+        }
+        order.setOrderStatus(OrderStatus.CANCELED);
+        orderRepo.save(order);
+        return getOrderById(orderId);
+    }
+
 }

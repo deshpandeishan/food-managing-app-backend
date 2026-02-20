@@ -55,4 +55,11 @@ public class OrderController {
         return ResponseEntity.ok(new ApiResponse<>("Orders list fetched", HttpStatus.OK.value(), responseData));
     }
 
+
+    @DeleteMapping("/orders/{orderId}")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> cancelOrder(@PathVariable Integer orderId) {
+        OrderDetailResponse response = service.cancelOrder(orderId);
+        return ResponseEntity.ok(new ApiResponse<>("Order canceled successfully", HttpStatus.OK.value(), response));
+    }
+
 }
