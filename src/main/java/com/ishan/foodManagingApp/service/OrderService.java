@@ -1,9 +1,7 @@
 package com.ishan.foodManagingApp.service;
 
 import com.ishan.foodManagingApp.DTO.*;
-import com.ishan.foodManagingApp.exception.FoodItemNotFoundException;
-import com.ishan.foodManagingApp.exception.OrderCancellationException;
-import com.ishan.foodManagingApp.exception.OrderNotFoundException;
+import com.ishan.foodManagingApp.exception.*;
 import com.ishan.foodManagingApp.model.Food;
 import com.ishan.foodManagingApp.model.Order;
 import com.ishan.foodManagingApp.model.OrderItem;
@@ -126,13 +124,65 @@ public class OrderService {
         });
     }
 
-    public OrderDetailResponse cancelOrder(Integer orderId) {
+    @Transactional
+    public OrderDetailResponse confirmOrder(Integer orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
 
-        Order order = orderRepo.findById(orderId) .orElseThrow(() -> new OrderNotFoundException(orderId));
-        if (order.getOrderStatus() == OrderStatus.CANCELED || order.getOrderStatus() == OrderStatus.DELIVERED) {
-            throw new OrderCancellationException(orderId);
+        switch (order.getOrderStatus()) {
+            case CONFIRMED -> throw new OrderConfirmationException(
+                    "Order " + orderId + " is already confirmed."
+            );
+            case CANCELED -> throw new OrderConfirmationException(
+                    "Order " + orderId + " was canceled and cannot be confirmed."
+            );
+            case DELIVERED -> throw new OrderConfirmationException(
+                    "Order " + orderId + " has already been delivered and cannot be confirmed."
+            );
+            default -> order.setOrderStatus(OrderStatus.CONFIRMED);
         }
-        order.setOrderStatus(OrderStatus.CANCELED);
+
+        orderRepo.save(order);
+        return getOrderById(orderId);
+    }
+
+    @Transactional
+    public OrderDetailResponse deliverOrder(Integer orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        switch (order.getOrderStatus()) {
+            case DELIVERED -> throw new OrderDeliveryException(
+                    "Order " + orderId + " is already delivered."
+            );
+            case CANCELED -> throw new OrderDeliveryException(
+                    "Order " + orderId + " was canceled and cannot be delivered."
+            );
+            case PENDING -> throw new OrderDeliveryException(
+                    "Order " + orderId + " must be confirmed before it can be delivered."
+            );
+            default -> order.setOrderStatus(OrderStatus.DELIVERED);
+        }
+
+        orderRepo.save(order);
+        return getOrderById(orderId);
+    }
+
+    @Transactional
+    public OrderDetailResponse cancelOrder(Integer orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        switch (order.getOrderStatus()) {
+            case CANCELED -> throw new OrderCancellationException(
+                    "Order " + orderId + " is already canceled."
+            );
+            case DELIVERED -> throw new OrderCancellationException(
+                    "Order " + orderId + " has already been delivered and cannot be canceled."
+            );
+            default -> order.setOrderStatus(OrderStatus.CANCELED);
+        }
+
         orderRepo.save(order);
         return getOrderById(orderId);
     }

@@ -41,16 +41,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(OrderCancellationException.class)
-    public ResponseEntity<ApiResponse<Object>> handleOrderCancellation(OrderCancellationException exception) {
-        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONFLICT.value(), null);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-    }
-
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleOrderNotFoundException(OrderNotFoundException exception) {
         ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.NOT_FOUND.value(), null);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    @ExceptionHandler(OrderConfirmationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOrderConfirmationError(OrderConfirmationException exception) {
+        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONFLICT.value(), null);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(OrderDeliveryException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOrderDeliveredError(OrderDeliveryException exception) {
+        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONTINUE.value(), null);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(OrderCancellationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOrderCancellationError(OrderCancellationException exception) {
+        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONFLICT.value(), null);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 }

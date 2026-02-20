@@ -4,6 +4,7 @@ import com.ishan.foodManagingApp.DTO.ApiResponse;
 import com.ishan.foodManagingApp.DTO.OrderCreateRequest;
 import com.ishan.foodManagingApp.DTO.OrderDetailResponse;
 import com.ishan.foodManagingApp.DTO.OrderListResponse;
+import com.ishan.foodManagingApp.model.Order;
 import com.ishan.foodManagingApp.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -55,11 +56,21 @@ public class OrderController {
         return ResponseEntity.ok(new ApiResponse<>("Orders list fetched", HttpStatus.OK.value(), responseData));
     }
 
+    @PutMapping("/orders/{orderId}/confirm")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> confirmOrder(@PathVariable Integer orderId) {
+        OrderDetailResponse response = service.confirmOrder(orderId);
+        return ResponseEntity.ok(new ApiResponse<>("Order confirmed", HttpStatus.OK.value(), response));
+    }
+
+    @PutMapping("orders/{orderId}/deliver")
+    public ResponseEntity<ApiResponse<OrderDetailResponse>> deliverOrder(@PathVariable Integer orderId) {
+        OrderDetailResponse response = service.deliverOrder(orderId);
+        return ResponseEntity.ok(new ApiResponse<>("Order delivered", HttpStatus.OK.value(), response));
+    }
 
     @PutMapping("/orders/{orderId}/cancel")
     public ResponseEntity<ApiResponse<OrderDetailResponse>> cancelOrder(@PathVariable Integer orderId) {
         OrderDetailResponse response = service.cancelOrder(orderId);
         return ResponseEntity.ok(new ApiResponse<>("Order canceled successfully", HttpStatus.OK.value(), response));
     }
-
 }
