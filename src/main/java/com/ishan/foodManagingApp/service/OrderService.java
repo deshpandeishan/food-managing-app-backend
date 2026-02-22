@@ -34,13 +34,16 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.PENDING);
 
-        List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
         BigDecimal totalTax = BigDecimal.ZERO;
+        BigDecimal totalCgst = BigDecimal.ZERO;
+        BigDecimal totalSgst = BigDecimal.ZERO;
 
-        for(int i = 0; i < request.getItems().size(); i++) {
-            OrderItemRequest itemRequest = request.getItems().get(i);
-            Food food = foodrepo.findById(itemRequest.getFoodId()) .orElseThrow(() -> new FoodItemNotFoundException(itemRequest.getFoodId()));
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            Food food = foodrepo.findById(itemRequest.getFoodId())
+                    .orElseThrow(() -> new FoodItemNotFoundException(itemRequest.getFoodId()));
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
@@ -56,28 +59,29 @@ public class OrderService {
             totalAmount = totalAmount.add(subtotal);
 
             TaxGroup taxGroup = food.getTaxGroup();
-
             BigDecimal cgst = BigDecimal.ZERO;
             BigDecimal sgst = BigDecimal.ZERO;
 
-            if (taxGroup != null) {
+            if (taxGroup != null && taxGroup.getTaxes() != null) {
                 for (Tax tax : taxGroup.getTaxes()) {
                     BigDecimal taxAmount = subtotal.multiply(tax.getTaxRate().divide(BigDecimal.valueOf(100)));
-                    if(tax.getTaxType() == TaxType.CGST) {
-                        cgst = cgst.add(taxAmount);
-                    } else if (tax.getTaxType() == TaxType.SGST) {
-                        sgst = sgst.add(taxAmount);
-                    }
+                    if (tax.getTaxType() == TaxType.CGST) cgst = cgst.add(taxAmount);
+                    else if (tax.getTaxType() == TaxType.SGST) sgst = sgst.add(taxAmount);
                 }
             }
 
             BigDecimal totalItemTax = cgst.add(sgst);
-            BigDecimal finalItemAmount = subtotal.add(totalItemTax);
+            BigDecimal totalAmountAfterTax = subtotal.add(totalItemTax);
+
             orderItem.setCgstAmount(cgst);
             orderItem.setSgstAmount(sgst);
             orderItem.setTotalTaxAmount(totalItemTax);
-            orderItem.setTotalAmountAfterTax(finalItemAmount);
+            orderItem.setTotalAmountAfterTax(totalAmountAfterTax);
+
+            totalCgst = totalCgst.add(cgst);
+            totalSgst = totalSgst.add(sgst);
             totalTax = totalTax.add(totalItemTax);
+
             orderItems.add(orderItem);
         }
 
@@ -99,8 +103,7 @@ public class OrderService {
 
         List<OrderItemResponse> itemResponses = new ArrayList<>();
 
-        for (int i = 0; i < savedOrder.getOrderItems().size(); i++) {
-            OrderItem item = savedOrder.getOrderItems().get(i);
+        for (OrderItem item : order.getOrderItems()) {
             OrderItemResponse itemResponse = new OrderItemResponse();
             itemResponse.setFoodName(item.getFood().getFoodName());
             itemResponse.setQuantity(item.getQuantity());
@@ -108,12 +111,15 @@ public class OrderService {
             itemResponse.setCgstAmount(item.getCgstAmount());
             itemResponse.setSgstAmount(item.getSgstAmount());
             itemResponse.setTotalAmount(item.getTotalTaxAmount());
+            itemResponse.setTotalTaxAmount(item.getTotalTaxAmount());
             itemResponse.setTotalAmountAfterTax(item.getTotalAmountAfterTax());
             itemResponse.setSubtotal(item.getSubtotal());
 
             itemResponses.add(itemResponse);
         }
         response.setItems(itemResponses);
+        response.setTotalCgst(totalCgst);
+        response.setTotalSgst(totalSgst);
         return response;
     }
 
@@ -126,10 +132,12 @@ public class OrderService {
         response.setOrderDate(order.getOrderDate());
         response.setStatus(order.getOrderStatus().name());
         response.setTotalAmount(order.getTotalAmount());
-        response.setTotalTax(order.getTotalTax());
-        response.setFinalAmount(order.getFinalAmount());
 
         List<OrderItemResponse> items = new ArrayList<>();
+        BigDecimal totalTax = BigDecimal.ZERO;
+        BigDecimal totalCgst = BigDecimal.ZERO;
+        BigDecimal totalSgst = BigDecimal.ZERO;
+
         for (OrderItem item : order.getOrderItems()) {
             OrderItemResponse itemResponse = new OrderItemResponse();
             itemResponse.setFoodName(item.getFood().getFoodName());
@@ -139,10 +147,31 @@ public class OrderService {
             itemResponse.setCgstAmount(item.getCgstAmount());
             itemResponse.setSgstAmount(item.getSgstAmount());
             itemResponse.setTotalAmount(item.getTotalTaxAmount());
+            itemResponse.setTotalTaxAmount(item.getTotalTaxAmount());
             itemResponse.setTotalAmountAfterTax(item.getTotalAmountAfterTax());
+
+            if (item.getTotalTaxAmount() != null) {
+                totalTax = totalTax.add(item.getTotalTaxAmount());
+            } else {
+                totalTax = totalTax.add(BigDecimal.ZERO);
+            }
+
+            if (item.getCgstAmount() != null) {
+                totalCgst = totalCgst.add(item.getCgstAmount());
+            }
+            if (item.getSgstAmount() != null) {
+                totalSgst = totalSgst.add(item.getSgstAmount());
+            }
+
             items.add(itemResponse);
         }
+
         response.setItems(items);
+        response.setTotalCgst(totalCgst);
+        response.setTotalSgst(totalSgst);
+        response.setTotalTax(totalTax);
+        response.setFinalAmount(order.getTotalAmount().add(totalTax));
+
         return response;
     }
 

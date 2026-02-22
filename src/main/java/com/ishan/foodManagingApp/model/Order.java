@@ -25,6 +25,8 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
+    private BigDecimal Cgst;
+    private BigDecimal Sgst;
     private BigDecimal totalTax;
     private BigDecimal finalAmount;
 

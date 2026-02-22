@@ -16,6 +16,7 @@ public class OrderItemResponse {
     private BigDecimal subtotal;
     private BigDecimal cgstAmount;
     private BigDecimal sgstAmount;
+    private BigDecimal totalTaxAmount;
     private BigDecimal totalAmount;
     private BigDecimal totalAmountAfterTax;
 }

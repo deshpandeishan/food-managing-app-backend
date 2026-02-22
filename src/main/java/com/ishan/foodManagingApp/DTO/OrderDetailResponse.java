@@ -14,6 +14,8 @@ public class OrderDetailResponse {
     private LocalDateTime orderDate;
     private String status;
     private BigDecimal totalAmount;
+    private BigDecimal totalCgst;
+    private BigDecimal totalSgst;
     private BigDecimal totalTax;
     private BigDecimal finalAmount;
     private List<OrderItemResponse> items;
