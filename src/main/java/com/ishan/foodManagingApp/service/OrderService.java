@@ -2,10 +2,7 @@ package com.ishan.foodManagingApp.service;
 
 import com.ishan.foodManagingApp.DTO.*;
 import com.ishan.foodManagingApp.exception.*;
-import com.ishan.foodManagingApp.model.Food;
-import com.ishan.foodManagingApp.model.Order;
-import com.ishan.foodManagingApp.model.OrderItem;
-import com.ishan.foodManagingApp.model.OrderStatus;
+import com.ishan.foodManagingApp.model.*;
 import com.ishan.foodManagingApp.repository.FoodRepo;
 import com.ishan.foodManagingApp.repository.OrderRepo;
 import jakarta.transaction.Transactional;
@@ -39,6 +36,7 @@ public class OrderService {
 
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalTax = BigDecimal.ZERO;
 
         for(int i = 0; i < request.getItems().size(); i++) {
             OrderItemRequest itemRequest = request.getItems().get(i);
@@ -56,10 +54,36 @@ public class OrderService {
             orderItem.setSubtotal(subtotal);
 
             totalAmount = totalAmount.add(subtotal);
+
+            TaxGroup taxGroup = food.getTaxGroup();
+
+            BigDecimal cgst = BigDecimal.ZERO;
+            BigDecimal sgst = BigDecimal.ZERO;
+
+            if (taxGroup != null) {
+                for (Tax tax : taxGroup.getTaxes()) {
+                    BigDecimal taxAmount = subtotal.multiply(tax.getTaxRate().divide(BigDecimal.valueOf(100)));
+                    if(tax.getTaxType() == TaxType.CGST) {
+                        cgst = cgst.add(taxAmount);
+                    } else if (tax.getTaxType() == TaxType.SGST) {
+                        sgst = sgst.add(taxAmount);
+                    }
+                }
+            }
+
+            BigDecimal totalItemTax = cgst.add(sgst);
+            BigDecimal finalItemAmount = subtotal.add(totalItemTax);
+            orderItem.setCgstAmount(cgst);
+            orderItem.setSgstAmount(sgst);
+            orderItem.setTotalTaxAmount(totalItemTax);
+            orderItem.setTotalAmountAfterTax(finalItemAmount);
+            totalTax = totalTax.add(totalItemTax);
             orderItems.add(orderItem);
         }
 
         order.setTotalAmount(totalAmount);
+        order.setTotalTax(totalTax);
+        order.setFinalAmount(totalAmount.add(totalTax));
         order.setOrderItems(orderItems);
 
         Order savedOrder = orderRepo.save(order);
@@ -69,6 +93,9 @@ public class OrderService {
         response.setOrderDate(savedOrder.getOrderDate());
         response.setStatus(savedOrder.getOrderStatus().name());
         response.setTotalAmount(savedOrder.getTotalAmount());
+        response.setTotalTax(savedOrder.getTotalTax());
+        response.setFinalAmount(savedOrder.getFinalAmount());
+
 
         List<OrderItemResponse> itemResponses = new ArrayList<>();
 
@@ -78,6 +105,9 @@ public class OrderService {
             itemResponse.setFoodName(item.getFood().getFoodName());
             itemResponse.setQuantity(item.getQuantity());
             itemResponse.setPriceAtTimeOfOrder(item.getPriceAtTimeOfOrder());
+            itemResponse.setCgstAmount(item.getCgstAmount());
+            itemResponse.setSgstAmount(item.getSgstAmount());
+            itemResponse.setTotalAmountAfterTax(item.getTotalAmountAfterTax());
             itemResponse.setSubtotal(item.getSubtotal());
 
             itemResponses.add(itemResponse);
