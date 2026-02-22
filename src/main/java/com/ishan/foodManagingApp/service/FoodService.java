@@ -5,9 +5,13 @@ import com.ishan.foodManagingApp.DTO.FoodCreateRequest;
 import com.ishan.foodManagingApp.DTO.FoodResponse;
 import com.ishan.foodManagingApp.DTO.FoodUpdateRequest;
 import com.ishan.foodManagingApp.exception.FoodItemNotFoundException;
+import com.ishan.foodManagingApp.exception.FoodValidationException;
 import com.ishan.foodManagingApp.exception.InvalidImageException;
 import com.ishan.foodManagingApp.model.Food;
+import com.ishan.foodManagingApp.model.TaxGroup;
 import com.ishan.foodManagingApp.repository.FoodRepo;
+import com.ishan.foodManagingApp.repository.TaxGroupRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,11 +30,19 @@ public class FoodService {
         this.repo = repo;
     }
 
+    @Autowired
+    private TaxGroupRepo taxGroupRepo;
+
     public void addFoodItem(FoodCreateRequest foodRequest, MultipartFile image) throws IOException {
         Food food = new Food();
         food.setFoodName(foodRequest.getFoodName());
         food.setPrice(foodRequest.getPrice());
         food.setCategory(foodRequest.getCategory());
+
+        if(foodRequest.getTaxGroupId() != null) {
+            TaxGroup taxGroup = taxGroupRepo.findById(foodRequest.getTaxGroupId()).orElseThrow(() -> new FoodValidationException("Tax group not found with id: " + foodRequest.getTaxGroupId()));
+            food.setTaxGroup(taxGroup);
+        }
 
         if (image != null && !image.isEmpty()) {
             food.setImageName(image.getOriginalFilename());

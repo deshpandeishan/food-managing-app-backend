@@ -65,15 +65,15 @@ public class FoodController {
             @Valid @RequestPart("data") FoodCreateRequest foodItem,
             @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
-        if (image == null || image.isEmpty()) {
-            throw new InvalidImageException("Image is required.");
-        }
-        if (!("image/png".equals(image.getContentType()) || "image/jpeg".equals(image.getContentType()))) {
-            throw new InvalidImageException("Only PNG or JPEG images are allowed.");
-        }
-        if (image.getSize() > 5 * 1024 * 1024) {
-            throw new InvalidImageException("Image size must be less than 5MB.");
-        }
+//        if (image == null || image.isEmpty()) {
+//            throw new InvalidImageException("Image is required.");
+//        }
+//        if (!("image/png".equals(image.getContentType()) || "image/jpeg".equals(image.getContentType()))) {
+//            throw new InvalidImageException("Only PNG or JPEG images are allowed.");
+//        }
+//        if (image.getSize() > 5 * 1024 * 1024) {
+//            throw new InvalidImageException("Image size must be less than 5MB.");
+//        }
 
         service.addFoodItem(foodItem, image);
 

@@ -18,4 +18,6 @@ public class FoodCreateRequest {
     private BigDecimal price;
     @NotBlank
     private String category;
+    @NotNull
+    private Integer taxGroupId;
 }

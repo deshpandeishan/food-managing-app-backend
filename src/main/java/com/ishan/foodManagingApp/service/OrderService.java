@@ -15,6 +15,9 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -41,10 +44,15 @@ public class OrderService {
         BigDecimal totalSgst = BigDecimal.ZERO;
 
         List<OrderItem> orderItems = new ArrayList<>();
+        List<Integer> foodIds = request.getItems().stream().map(OrderItemRequest::getFoodId).toList();
+        List<Food> foods = foodrepo.findAllById(foodIds);
+        Map<Integer, Food> foodMap = foods.stream().collect(Collectors.toMap(Food::getFoodId, Function.identity()));
 
         for (OrderItemRequest itemRequest : request.getItems()) {
-            Food food = foodrepo.findById(itemRequest.getFoodId())
-                    .orElseThrow(() -> new FoodItemNotFoundException(itemRequest.getFoodId()));
+            Food food = foodMap.get(itemRequest.getFoodId());
+            if (food == null) {
+                throw new FoodItemNotFoundException(itemRequest.getFoodId());
+            }
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
