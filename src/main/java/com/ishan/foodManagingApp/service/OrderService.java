@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,9 @@ public class OrderService {
 
             if (taxGroup != null && taxGroup.getTaxes() != null) {
                 for (Tax tax : taxGroup.getTaxes()) {
-                    BigDecimal taxAmount = subtotal.multiply(tax.getTaxRate().divide(BigDecimal.valueOf(100)));
+                    BigDecimal taxAmount = subtotal.multiply(
+                            tax.getTaxRate().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
+                    );
                     if (tax.getTaxType() == TaxType.CGST) cgst = cgst.add(taxAmount);
                     else if (tax.getTaxType() == TaxType.SGST) sgst = sgst.add(taxAmount);
                 }
