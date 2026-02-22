@@ -19,17 +19,25 @@ public class Food {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer foodId;
+
     @NotBlank()
     @Size(max = 100)
     private String foodName;
+
     @NotNull()
     @Positive()
     private BigDecimal price;
+
     @NotBlank()
     private String category;
+
     @Column(name = "image_data", columnDefinition = "bytea")
     @JdbcTypeCode(SqlTypes.BINARY)
     private byte[] imageData;
     private String imageName;
     private String imageType;
+
+    @ManyToOne
+    @JoinColumn(name = "tax_group_id")
+    private TaxGroup taxGroup;
 }

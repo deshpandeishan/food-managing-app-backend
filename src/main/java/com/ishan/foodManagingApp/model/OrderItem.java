@@ -27,4 +27,9 @@ public class OrderItem {
     private Integer quantity;
     private BigDecimal priceAtTimeOfOrder;
     private BigDecimal subtotal;
+
+    private BigDecimal cgstAmount;
+    private BigDecimal sgstAmount;
+    private BigDecimal totalTaxAmount;
+    private  BigDecimal totalAmountAfterTax;
 }
