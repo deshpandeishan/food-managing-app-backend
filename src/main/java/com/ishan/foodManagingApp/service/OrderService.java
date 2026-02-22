@@ -87,7 +87,7 @@ public class OrderService {
     }
 
     public OrderDetailResponse getOrderById(Integer orderId) {
-        Order order = orderRepo.findById(orderId)
+        Order order = orderRepo.findOrderWithItems(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         OrderDetailResponse response = new OrderDetailResponse();
@@ -111,7 +111,7 @@ public class OrderService {
 
     public Page<OrderListResponse> getOrdersList(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Order> ordersPage = orderRepo.findAll(pageable);
+        Page<Order> ordersPage = orderRepo.findAllOrders(pageable);
 
         return ordersPage.map(order -> {
             OrderListResponse response = new OrderListResponse();
@@ -130,15 +130,12 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         switch (order.getOrderStatus()) {
-            case CONFIRMED -> throw new OrderConfirmationException(
-                    "Order " + orderId + " is already confirmed."
-            );
-            case CANCELED -> throw new OrderConfirmationException(
-                    "Order " + orderId + " was canceled and cannot be confirmed."
-            );
-            case DELIVERED -> throw new OrderConfirmationException(
-                    "Order " + orderId + " has already been delivered and cannot be confirmed."
-            );
+            case CONFIRMED -> throw new OrderConfirmationException("Order " + orderId + " is already confirmed.");
+
+            case CANCELED -> throw new OrderConfirmationException("Order " + orderId + " was canceled and cannot be confirmed.");
+
+            case DELIVERED -> throw new OrderConfirmationException("Order " + orderId + " has already been delivered and cannot be confirmed.");
+
             default -> order.setOrderStatus(OrderStatus.CONFIRMED);
         }
 
@@ -152,15 +149,12 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         switch (order.getOrderStatus()) {
-            case DELIVERED -> throw new OrderDeliveryException(
-                    "Order " + orderId + " is already delivered."
-            );
-            case CANCELED -> throw new OrderDeliveryException(
-                    "Order " + orderId + " was canceled and cannot be delivered."
-            );
-            case PENDING -> throw new OrderDeliveryException(
-                    "Order " + orderId + " must be confirmed before it can be delivered."
-            );
+            case DELIVERED -> throw new OrderDeliveryException("Order " + orderId + " is already delivered.");
+
+            case CANCELED -> throw new OrderDeliveryException("Order " + orderId + " was canceled and cannot be delivered.");
+
+            case PENDING -> throw new OrderDeliveryException("Order " + orderId + " must be confirmed before it can be delivered.");
+
             default -> order.setOrderStatus(OrderStatus.DELIVERED);
         }
 
