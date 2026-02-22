@@ -23,4 +23,8 @@ public class Tax {
 
     @Enumerated(EnumType.STRING)
     private TaxType taxType;
+
+    @ManyToOne
+    @JoinColumn(name = "tax_group_id")
+    private TaxGroup taxGroup;
 }

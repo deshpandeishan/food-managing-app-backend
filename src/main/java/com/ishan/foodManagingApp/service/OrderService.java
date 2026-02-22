@@ -107,6 +107,7 @@ public class OrderService {
             itemResponse.setPriceAtTimeOfOrder(item.getPriceAtTimeOfOrder());
             itemResponse.setCgstAmount(item.getCgstAmount());
             itemResponse.setSgstAmount(item.getSgstAmount());
+            itemResponse.setTotalAmount(item.getTotalTaxAmount());
             itemResponse.setTotalAmountAfterTax(item.getTotalAmountAfterTax());
             itemResponse.setSubtotal(item.getSubtotal());
 
@@ -125,6 +126,8 @@ public class OrderService {
         response.setOrderDate(order.getOrderDate());
         response.setStatus(order.getOrderStatus().name());
         response.setTotalAmount(order.getTotalAmount());
+        response.setTotalTax(order.getTotalTax());
+        response.setFinalAmount(order.getFinalAmount());
 
         List<OrderItemResponse> items = new ArrayList<>();
         for (OrderItem item : order.getOrderItems()) {
@@ -133,6 +136,10 @@ public class OrderService {
             itemResponse.setQuantity(item.getQuantity());
             itemResponse.setPriceAtTimeOfOrder(item.getPriceAtTimeOfOrder());
             itemResponse.setSubtotal(item.getSubtotal());
+            itemResponse.setCgstAmount(item.getCgstAmount());
+            itemResponse.setSgstAmount(item.getSgstAmount());
+            itemResponse.setTotalAmount(item.getTotalTaxAmount());
+            itemResponse.setTotalAmountAfterTax(item.getTotalAmountAfterTax());
             items.add(itemResponse);
         }
         response.setItems(items);

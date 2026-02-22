@@ -18,6 +18,6 @@ public class TaxGroup {
     private Integer taxGroupId;
     private String groupName;
 
-    @OneToMany
-    private List<Tax> Taxes;
+    @OneToMany(mappedBy = "taxGroup", cascade = CascadeType.ALL)
+    private List<Tax> taxes;
 }
