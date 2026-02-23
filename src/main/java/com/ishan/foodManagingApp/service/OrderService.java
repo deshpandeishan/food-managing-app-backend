@@ -48,6 +48,12 @@ public class OrderService {
         List<Food> foods = foodrepo.findAllById(foodIds);
         Map<Integer, Food> foodMap = foods.stream().collect(Collectors.toMap(Food::getFoodId, Function.identity()));
 
+        for(Integer id : foodIds) {
+            if(!foodMap.containsKey(id)) {
+                throw new FoodItemNotFoundException(id);
+            }
+        }
+
         for (OrderItemRequest itemRequest : request.getItems()) {
             Food food = foodMap.get(itemRequest.getFoodId());
             if (food == null) {
