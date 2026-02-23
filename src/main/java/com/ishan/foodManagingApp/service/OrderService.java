@@ -82,8 +82,11 @@ public class OrderService {
                     BigDecimal taxAmount = subtotal.multiply(
                             tax.getTaxRate().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
                     );
-                    if (tax.getTaxType() == TaxType.CGST) cgst = cgst.add(taxAmount);
-                    else if (tax.getTaxType() == TaxType.SGST) sgst = sgst.add(taxAmount);
+                    if (tax.getTaxType() == TaxType.CGST) {
+                        cgst = cgst.add(taxAmount);
+                    } else if (tax.getTaxType() == TaxType.SGST) {
+                        sgst = sgst.add(taxAmount);
+                    }
                 }
             }
 
@@ -127,7 +130,7 @@ public class OrderService {
             itemResponse.setPriceAtTimeOfOrder(item.getPriceAtTimeOfOrder());
             itemResponse.setCgstAmount(item.getCgstAmount());
             itemResponse.setSgstAmount(item.getSgstAmount());
-            itemResponse.setTotalAmount(item.getTotalTaxAmount());
+//            itemResponse.setTotalAmount(item.getTotalTaxAmount());
             itemResponse.setTotalTaxAmount(item.getTotalTaxAmount());
             itemResponse.setTotalAmountAfterTax(item.getTotalAmountAfterTax());
             itemResponse.setSubtotal(item.getSubtotal());
@@ -163,7 +166,7 @@ public class OrderService {
             itemResponse.setSubtotal(item.getSubtotal());
             itemResponse.setCgstAmount(item.getCgstAmount());
             itemResponse.setSgstAmount(item.getSgstAmount());
-            itemResponse.setTotalAmount(item.getTotalTaxAmount());
+//            itemResponse.setTotalAmount(item.getTotalTaxAmount());
             itemResponse.setTotalTaxAmount(item.getTotalTaxAmount());
             itemResponse.setTotalAmountAfterTax(item.getTotalAmountAfterTax());
 
