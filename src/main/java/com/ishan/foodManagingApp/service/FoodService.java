@@ -4,6 +4,7 @@ import com.ishan.foodManagingApp.DTO.ApiResponse;
 import com.ishan.foodManagingApp.DTO.FoodCreateRequest;
 import com.ishan.foodManagingApp.DTO.FoodResponse;
 import com.ishan.foodManagingApp.DTO.FoodUpdateRequest;
+import com.ishan.foodManagingApp.exception.FoodInUseException;
 import com.ishan.foodManagingApp.exception.FoodItemNotFoundException;
 import com.ishan.foodManagingApp.exception.FoodValidationException;
 import com.ishan.foodManagingApp.exception.InvalidImageException;
@@ -12,6 +13,7 @@ import com.ishan.foodManagingApp.model.TaxGroup;
 import com.ishan.foodManagingApp.repository.FoodRepo;
 import com.ishan.foodManagingApp.repository.TaxGroupRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -104,6 +106,11 @@ public class FoodService {
     public void deleteFoodItem(Integer foodId) {
         if (!repo.existsById(foodId)) {
             throw new FoodItemNotFoundException(foodId);
+        }
+        try {
+            repo.deleteById(foodId);
+        } catch (DataIntegrityViolationException exception) {
+            throw new FoodInUseException("Food item with id: " + foodId + " is a part of existing orders.");
         }
         repo.deleteById(foodId);
     }

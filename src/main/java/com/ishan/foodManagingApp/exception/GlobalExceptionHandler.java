@@ -64,4 +64,10 @@ public class GlobalExceptionHandler {
         ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONFLICT.value(), null);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
+
+    @ExceptionHandler(FoodInUseException.class)
+    public ResponseEntity<ApiResponse<Object>> handleFoodInUseException(FoodInUseException exception) {
+        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONTINUE.value(), null);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
 }
