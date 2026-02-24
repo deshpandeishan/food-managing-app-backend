@@ -77,16 +77,20 @@ public class OrderService {
             BigDecimal cgst = BigDecimal.ZERO;
             BigDecimal sgst = BigDecimal.ZERO;
 
-            if (taxGroup != null && taxGroup.getTaxes() != null) {
-                for (Tax tax : taxGroup.getTaxes()) {
-                    BigDecimal taxAmount = subtotal.multiply(
-                            tax.getTaxRate().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)
-                    );
-                    if (tax.getTaxType() == TaxType.CGST) {
-                        cgst = cgst.add(taxAmount);
-                    } else if (tax.getTaxType() == TaxType.SGST) {
-                        sgst = sgst.add(taxAmount);
-                    }
+            if (taxGroup == null) {
+                throw new TaxGroupNotFoundException("Tax group is not assigned to this food item");
+            }
+
+            if (taxGroup.getTaxes() == null || taxGroup.getTaxes().isEmpty()) {
+                throw new TaxGroupNotFoundException("No taxes mapped to the tax group.");
+            }
+
+            for (Tax tax : taxGroup.getTaxes()) {
+                BigDecimal taxAmount = subtotal.multiply(tax.getTaxRate()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                if (tax.getTaxType() == TaxType.CGST) {
+                    cgst = cgst.add(taxAmount);
+                } else if (tax.getTaxType() == TaxType.SGST) {
+                    sgst = sgst.add(taxAmount);
                 }
             }
 

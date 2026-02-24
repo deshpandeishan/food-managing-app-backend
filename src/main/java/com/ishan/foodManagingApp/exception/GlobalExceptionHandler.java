@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderDeliveryException.class)
     public ResponseEntity<ApiResponse<Object>> handleOrderDeliveredError(OrderDeliveryException exception) {
-        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONTINUE.value(), null);
+        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONFLICT.value(), null);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
@@ -63,5 +63,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleOrderCancellationError(OrderCancellationException exception) {
         ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.CONFLICT.value(), null);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(TaxGroupNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleTaxGroupNotFoundException(TaxGroupNotFoundException exception) {
+        ApiResponse<Object> response = new ApiResponse<>(exception.getMessage(), HttpStatus.UNPROCESSABLE_CONTENT.value(), null);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(response);
     }
 }
