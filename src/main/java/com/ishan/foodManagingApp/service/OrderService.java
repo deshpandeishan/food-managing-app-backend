@@ -109,6 +109,8 @@ public class OrderService {
             orderItems.add(orderItem);
         }
 
+        order.setCgst(totalCgst);
+        order.setSgst(totalSgst);
         order.setTotalAmount(totalAmount);
         order.setTotalTax(totalTax);
         order.setFinalAmount(totalAmount.add(totalTax));
